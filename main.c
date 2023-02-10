@@ -8,10 +8,6 @@ int main() {
     if (!board)
         return 1;
     move ruch;
-    ruch.what[0] = 0;
-    ruch.what[1] = 0;
-    ruch.where[0] = 1;
-    ruch.where[1] = 1;
     start(board);
     while(1) {
         printBoard(board);

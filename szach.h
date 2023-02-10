@@ -16,8 +16,13 @@ struct move{
     int what[2];
     int where[2];
 };
-
 typedef struct move move;
+
+struct moveList{
+    struct moveList* next;
+    move legalMove;
+};
+typedef struct moveList moveList;
 
 void start(char **board);
 void printBoard(char** );
@@ -28,8 +33,11 @@ char** makeBoard();
 char** copyBoard(char **board);
 void search(char** gdzie,char kogo, move* zapis);
 int checkAll(char **board, move x, int kto);
+moveList* getLegal(char** board, int kto);
+moveList* pawnLegal(char** board,int column, int row);
 
 #include "checks.h"
+#include "szach_listy.h"
 
 void start(char **board){
     board[0][7] = 'r';
@@ -212,4 +220,91 @@ int checkAll(char **board, move x, int kto){
     return 1;
 }
 
+moveList* getLegal(char** board, int kto){
+    moveList* head = NULL;
+    moveList* pomocnik;
+    moveList* kolejnyPomocnik;
+    if (kto == 1){
+        for (int i = 0; i < 8; i++){
+            for (int j = 0; j < 8; j++){
+                pomocnik = head;
+                switch (board[i][j]) {
+                    case 'P':
+                        head = pawnLegal(board, i, j);
+                        break;
+                }
+                kolejnyPomocnik = getLast(head);
+                kolejnyPomocnik->next = pomocnik;
+            }
+        }
+    } else {
+        for (int i = 0; i < 8; i++){
+            for (int j = 0; j < 8; j++){
+                pomocnik = head;
+                switch (board[i][j]) {
+                    case 'p':
+                        head = pawnLegal(board, i, j);
+                        break;
+                }
+                kolejnyPomocnik = getLast(head);
+                kolejnyPomocnik->next = pomocnik;
+            }
+        }
+    }
+    return head;
+}
+
+moveList* pawnLegal(char** board, int column, int row){
+    int forward;
+    moveList* head = NULL;
+    moveList* p;
+    move ruch;
+    ruch.what[0] = column;
+    ruch.what[1] = row;
+    forward = board[column][row] == 'P' ? 1 : -1;
+    ruch.where[0] = column;
+    ruch.where[1] = row + forward;
+    if (checkAll(board,ruch , forward == 1 ? 1 : 0) == 1){
+        head = (moveList*)malloc(sizeof(moveList));
+        if (!head)
+            return NULL;
+        head->next = NULL;
+    }
+
+    ruch.where[0] = column;
+    ruch.where[1] = row + 2*forward;
+    if (checkAll(board,ruch , forward == 1 ? 1 : 0) == 1){
+        p = head;
+        head = (moveList*)malloc(sizeof(moveList));
+        if (!head){
+            removeList(p);
+            return NULL;
+        }
+        head->next = p;
+    }
+
+    ruch.where[0] = column + 1;
+    ruch.where[1] = row + forward;
+    if (checkAll(board,ruch , forward == 1 ? 1 : 0) == 1){
+        p = head;
+        head = (moveList*)malloc(sizeof(moveList));
+        if (!head){
+            removeList(p);
+            return NULL;
+        }
+        head->next = p;
+    }
+
+    ruch.where[0] = column - 1;
+    ruch.where[1] = row + forward;
+    if (checkAll(board,ruch , forward == 1 ? 1 : 0) == 1){
+        p = head;
+        head = (moveList*)malloc(sizeof(moveList));
+        if (!head){
+            removeList(head);
+            return NULL;
+        }
+        head->next = p;
+    }
+}
 #endif //UNTITLED2_SZACH_H

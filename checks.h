@@ -255,4 +255,5 @@ int checkCheck(char** board, int kto){
     return 0;
 }
 
+
 #endif //UNTITLED_CHECKS_H

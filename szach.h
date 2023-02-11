@@ -35,6 +35,7 @@ void search(char** gdzie,char kogo, move* zapis);
 int checkAll(char **board, move x, int kto);
 moveList* getLegal(char** board, int kto);
 moveList* pawnLegal(char** board,int column, int row);
+int checkMate(char** board, int kto);
 
 #include "checks.h"
 #include "szach_listy.h"
@@ -220,6 +221,16 @@ int checkAll(char **board, move x, int kto){
     return 1;
 }
 
+int checkMate(char** board, int kto){
+    moveList* sloppy;
+    sloppy = getLegal(board, kto);
+    if ((sloppy->legalMove).what[0] == -1){
+        return 1;
+    }
+    return 0;
+}
+
+
 moveList* getLegal(char** board, int kto){
     moveList* head = NULL;
     moveList* pomocnik;
@@ -228,13 +239,15 @@ moveList* getLegal(char** board, int kto){
         for (int i = 0; i < 8; i++){
             for (int j = 0; j < 8; j++){
                 pomocnik = head;
+                head = NULL;
                 switch (board[i][j]) {
                     case 'P':
                         head = pawnLegal(board, i, j);
                         break;
                 }
                 kolejnyPomocnik = getLast(head);
-                kolejnyPomocnik->next = pomocnik;
+                if (kolejnyPomocnik != NULL)
+                    kolejnyPomocnik->next = pomocnik;
             }
         }
     } else {
@@ -268,6 +281,7 @@ moveList* pawnLegal(char** board, int column, int row){
         head = (moveList*)malloc(sizeof(moveList));
         if (!head)
             return NULL;
+        head->legalMove = ruch;
         head->next = NULL;
     }
 
@@ -280,6 +294,7 @@ moveList* pawnLegal(char** board, int column, int row){
             removeList(p);
             return NULL;
         }
+        head->legalMove = ruch;
         head->next = p;
     }
 
@@ -292,6 +307,7 @@ moveList* pawnLegal(char** board, int column, int row){
             removeList(p);
             return NULL;
         }
+        head->legalMove = ruch;
         head->next = p;
     }
 
@@ -304,7 +320,17 @@ moveList* pawnLegal(char** board, int column, int row){
             removeList(head);
             return NULL;
         }
+        head->legalMove = ruch;
         head->next = p;
     }
+    if(head == NULL){
+        head = (moveList*)malloc(sizeof(moveList));
+        if(!head)
+            return NULL;
+        ruch.what[0] = -1;
+        head->legalMove = ruch;
+        head->next = NULL;
+    }
+    return head;
 }
 #endif //UNTITLED2_SZACH_H

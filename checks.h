@@ -129,7 +129,7 @@ int wHorseCheck(char** board, move x){
 }
 int bHorseCheck(char** board, move x){
     int haha;
-    haha = abs(x.what[0] - x.where[0]) * (x.what[1] - x.where[1]);
+    haha = abs(x.what[0] - x.where[0]) * abs(x.what[1] - x.where[1]);
     if(haha == 2 && strchr(BLACK, board[x.where[0]][x.where[1]]) == NULL)
         return 1;
     return 0;
